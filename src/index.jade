@@ -1,0 +1,137 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1')
+    title JavaScript Generators
+
+    link(rel='stylesheet', type='text/css', href='build/build.css')
+
+  body
+
+    article
+
+      section
+        h1 JavaScript Generators
+
+      section
+        h2 Async Control Flow
+        ul
+          li Callbacks
+          li Promises
+          li Generators
+          li aync/await (ES7/ES2016)
+
+      section
+        h1 Callbacks
+
+      section
+        pre
+          code.language-javascript.
+            createUser(name, function() {  
+              getFacebookFriends(name, function(friends) {
+                if (friends) {
+                  inviteFacebookFriends(friends, function(invitations) {
+                    // ad infinitum
+                  });
+                };
+              });
+            });
+
+      section
+        h1 Promises
+
+      section
+        pre
+          code.language-javascript.
+            createUser(name)  
+              .then(getFacebookFriends)
+              .then(function(friends) {
+                if (friends) {
+                  return inviteFacebookFriends(friends);
+                } else {
+                  throw new AntiSocialError('No friends to invite');
+                }
+              })
+              .catch(displayError);
+
+      section
+        h1 Generators
+
+      section
+        pre
+          code.language-javascript.
+            function setupNewUser(name) {  
+              return spawn(function*() {
+                var invitations,
+                    newUser = yield createUser(name),
+                    friends = yield getFacebookFriends(name);
+
+                if (friends) {
+                  invitations = yield inviteFacebookFriends(friends);
+                }
+              }
+            }
+
+      section
+        h1 aync/await (ES7/ES2016)
+
+      section
+        pre
+          code.language-javascript.
+            async function setupNewUser(name) {  
+              var invitations,
+                  newUser = await createUser(name),
+                  friends = await getFacebookFriends(name);
+
+              if (friends) {
+                invitations = await inviteFacebookFriends(friends);
+              }
+            }
+
+      section
+        h2 Event Loop Refresher
+        p TODO
+
+      section
+        h2 Keyboard Interaction
+        h3 Powered by <a href="https://github.com/markdalgleish/bespoke-keys">bespoke-keys</a>
+
+      section
+        h2 Bullet List
+        h3.bullet Powered by <a href="https://github.com/markdalgleish/bespoke-bullets">bespoke-bullets</a>
+        ul
+          li Bullet 1
+          li Bullet 2
+          li Bullet 3
+
+      section
+        h2 Syntax Highlighting
+        h3 Powered by <a href="http://twitter.com/LeaVerou">Lea Verou</a>'s <a href="https://github.com/LeaVerou/prism">Prism</a>
+        pre
+          code.language-javascript.
+            bespoke.from('article', [
+              classes(),
+              keys(),
+              touch(),
+              bullets('li, .bullet')
+            ]);
+
+      section.emphatic-text(data-bespoke-backdrop='emphatic')
+        h2 Emphatic Slide!
+        h3 Powered by <a href="https://github.com/markdalgleish/bespoke-backdrop">bespoke-backdrop</a>
+
+      section
+        h2.bullet Just the beginning...
+        br
+        ul
+          li Edit <a href="http://jade-lang.com/">Jade</a> markup in <em>'src/index.jade'</em>
+          li Edit <a href="http://learnboost.github.io/stylus/">Stylus</a> styles in <em>'src/styles/main.styl'</em>
+          li Edit JavaScript in <em>'src/scripts/main.js'</em>
+        br
+        ul
+          li
+            strong Enjoy! :)
+            a(href='http://twitter.com/markdalgleish')  -@markdalgleish
+
+    script(src='build/build.js')
