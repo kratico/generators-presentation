@@ -13,9 +13,10 @@ html
 
       section
         h1 JavaScript Generators
+        h3 by Matias Volpe
 
       section
-        h2 Async Control Flow
+        h2.bullet Async Control Flow
         ul
           li Callbacks
           li Promises
@@ -23,115 +24,372 @@ html
           li aync/await (ES7/ES2016)
 
       section
-        h1 Callbacks
+        h2 Problem
+        h3.bullet Get all the users from a tweet stream
+        ul
+          li Get tweets
+          li Get userIds
+          li Make a request for each userId
+          li Return a user array
+      
+      section
+        h2 Problem APIs
+        pre.my-small
+          code.language-javascript.
+            // GET api/tweets.json
+            [{
+              "text": "tweet text 1",
+              "userId": 1
+            },{
+              "text": "tweet text 2",
+              "userId": 2
+            }]
+
+            // GET api/user-1.json
+            {
+              "id": 1,
+              "name": "user-1"
+            }
 
       section
-        pre
+        h2 Callbacks
+        pre.my-small
           code.language-javascript.
-            createUser(name, function() {  
-              getFacebookFriends(name, function(friends) {
-                if (friends) {
-                  inviteFacebookFriends(friends, function(invitations) {
-                    // ad infinitum
-                  });
-                };
+            function getUsersForTweets(cb) {
+              request('api/tweets.json', function(err, tweets) {
+                async.map(
+                  ['api/user-' + tweets[0].userId + '.json',
+                   'api/user-' + tweets[1].userId + '.json',
+                   'api/user-' + tweets[2].userId + '.json'],
+                  request,
+                  function(err, results) {
+                    cb(null, results);
+                });
               });
+            }
+            getUsersForTweets(function(err, results) {
+              console.log(results);
             });
 
       section
-        h1 Promises
-
-      section
-        pre
+        h2 Callbacks
+        pre.my-small
           code.language-javascript.
-            createUser(name)  
-              .then(getFacebookFriends)
-              .then(function(friends) {
-                if (friends) {
-                  return inviteFacebookFriends(friends);
-                } else {
-                  throw new AntiSocialError('No friends to invite');
-                }
-              })
-              .catch(displayError);
+            function getUsersForTweets(cb) {
+              getTweets(function(err, tweets) {
+                var userIds = getUniqueUserIds(tweets);
+                async.map(userIds, getUser, function(err, results) {
+                  cb(null, results);
+                });
+              });
+            }
+
+            getUsersForTweets(function(err, results) {
+              console.log(results);
+            });
 
       section
-        h1 Generators
-
-      section
-        pre
+        h2 Callbacks
+        pre.my-small
           code.language-javascript.
-            function setupNewUser(name) {  
-              return spawn(function*() {
-                var invitations,
-                    newUser = yield createUser(name),
-                    friends = yield getFacebookFriends(name);
+            function request(url, cb) {
+              // See https://api.jquery.com/jquery.get/
+              $.get(url, function(result) {
+                cb(null, result);
+              });
+            }
 
-                if (friends) {
-                  invitations = yield inviteFacebookFriends(friends);
-                }
-              }
+            function getTweets(cb) {
+              request('api/tweets.json', cb);
+            }
+
+            function getUser(userId, cb) {
+              request('api/user-' + userId + '.json', cb);
             }
 
       section
-        h1 aync/await (ES7/ES2016)
+        h2 Promises
+        pre.my-small
+          code.language-javascript.
+            function getUsersForTweets() {
+              return request('api/tweets.json')
+                .then(function(tweets) {
+                  return Promise.all([
+                    request('api/user-' + tweets[0].userId + '.json'),
+                    request('api/user-' + tweets[1].userId + '.json'),
+                    request('api/user-' + tweets[2].userId + '.json')
+                  ]);
+                });
+            }
+
+            getUsersForTweets()
+              .then(console.log);
 
       section
-        pre
+        h2 Promises
+        pre.my-small
           code.language-javascript.
-            async function setupNewUser(name) {  
-              var invitations,
-                  newUser = await createUser(name),
-                  friends = await getFacebookFriends(name);
-
-              if (friends) {
-                invitations = await inviteFacebookFriends(friends);
-              }
+            function getUsersForTweets() {
+              return getTweets()
+                .then(function(tweets) {
+                  var userIds = getUniqueUserIds(tweets);
+                  var usersPromises = userIds.map(function(userId) {
+                    return getUser(userId);
+                  });
+                  return Promise.all(usersPromises);
+                });
             }
+
+            getUsersForTweets()
+              .then(console.log);
+
+      section
+        h2 Promises
+        pre.my-small
+          code.language-javascript.
+            function request(url) {
+              // See https://api.jquery.com/jquery.get/
+              return new Promise(function(resolve, reject) {
+                $.get(url, resolve);
+              });
+            }
+
+            function getTweets() {
+              return request('api/tweets.json');
+            }
+
+            function getUser(userId) {
+              return request('api/user-' + userId + '.json');
+            }
+
+      section
+        h2 Generators
+        pre.my-small
+          code.language-javascript.
+            co(function* getUsersForTweets2() {
+              var tweets = yield request('api/tweets.json');
+              var users = yield Promise.all([
+                request('api/user-' + tweets[0].userId + '.json'),
+                request('api/user-' + tweets[1].userId + '.json'),
+                request('api/user-' + tweets[2].userId + '.json')
+              ]);
+              console.log(users);
+            });
+
+      section
+        h2 Generators
+        pre.my-small
+          code.language-javascript.
+            co(function* getUsersForTweets() {
+              var tweets = yield getTweets();
+              var userIds = getUniqueUserIds(tweets);
+              var usersPromises = userIds.map(function(userId) {
+                return getUser(userId);
+              });
+              var users = yield Promise.all(usersPromises);
+              console.log(users);
+            });
+
+      section
+        h2 aync/await (ES7/ES2016)
+        pre.my-small
+          code.language-javascript.
+            async function getUsersForTweets() {
+              var tweets = await getTweets();
+              var userIds = getUniqueUserIds(tweets);
+              var usersPromises = userIds.map(function(userId) {
+                return getUser(userId);
+              });
+              var users = await Promise.all(usersPromises);
+              console.log(users);
+            };
 
       section
         h2 Event Loop Refresher
-        p TODO
+        p
+          a(href="http://latentflip.com/loupe/") Demo
+      
+      section
+        h2 What are generators?
+        pre.my-small
+          code.language-javascript.
+            function* genFunc() {
+              console.log('First');
+              yield; // (A)
+              console.log('Second'); // (B)
+            }
+
+            > var genObj = genFunc();
+            > genObj.next()
+            First
+            { value: undefined, done: false }
+            > genObj.next()
+            Second
+            { value: undefined, done: true }
 
       section
-        h2 Keyboard Interaction
-        h3 Powered by <a href="https://github.com/markdalgleish/bespoke-keys">bespoke-keys</a>
-
-      section
-        h2 Bullet List
-        h3.bullet Powered by <a href="https://github.com/markdalgleish/bespoke-bullets">bespoke-bullets</a>
+        h2 Generators as
         ul
-          li Bullet 1
-          li Bullet 2
-          li Bullet 3
+          li Iterators (data producers)
+          li Observers (data consumers)
+          li Coroutines (data producers and consumers)
 
       section
-        h2 Syntax Highlighting
-        h3 Powered by <a href="http://twitter.com/LeaVerou">Lea Verou</a>'s <a href="https://github.com/LeaVerou/prism">Prism</a>
+        h2 Generators as Iterators
+        pre.my-small
+          code.language-javascript.
+            interface Iterable {
+              [Symbol.iterator]() : Iterator;
+            }
+            interface Iterator {
+              next() : IteratorResult;
+              return?(value? : any) : IteratorResult;
+            }
+            interface IteratorResult {
+              value : any;
+              done : boolean;
+            }
+
+      section
+        pre.my-small
+          code.language-javascript.
+            function* genFunc() {
+                yield 'a';
+                yield 'b';
+            }
+
+            > var genObj = genFunc();
+            > genObj.next()
+            { value: 'a', done: false }
+            > genObj.next()
+            { value: 'b', done: false }
+            > genObj.next() // done: true => end of sequence
+            { value: undefined, done: true }
+
+      section
+        pre.my-small
+          code.language-javascript.
+            function* genFunc() {
+                yield 'a';
+                yield 'b';
+                return 'result'
+            }
+
+            > var genObj = genFunc();
+            > genObj.next()
+            { value: 'a', done: false }
+            > genObj.next()
+            { value: 'b', done: false }
+            > genObj.next()
+            { value: 'result', done: true }
+
+      section
+        h2 Generators as Observers
         pre
           code.language-javascript.
-            bespoke.from('article', [
-              classes(),
-              keys(),
-              touch(),
-              bullets('li, .bullet')
-            ]);
-
-      section.emphatic-text(data-bespoke-backdrop='emphatic')
-        h2 Emphatic Slide!
-        h3 Powered by <a href="https://github.com/markdalgleish/bespoke-backdrop">bespoke-backdrop</a>
+            interface Observer {
+              next(value? : any) : void;
+              return(value? : any) : void;
+              throw(error) : void;
+            }
 
       section
-        h2.bullet Just the beginning...
-        br
+        h2 Generators as Observers
+        p As an observer, a generator pauses until it receives input. There are three kinds of input, transmitted via the methods specified by the interface:
         ul
-          li Edit <a href="http://jade-lang.com/">Jade</a> markup in <em>'src/index.jade'</em>
-          li Edit <a href="http://learnboost.github.io/stylus/">Stylus</a> styles in <em>'src/styles/main.styl'</em>
-          li Edit JavaScript in <em>'src/scripts/main.js'</em>
-        br
+          li next() sends normal input.
+          li return() terminates the generator.
+          li throw() signals an error.
+
+      section
+        pre.my-small
+          code.language-javascript.
+            function* dataConsumer() {
+                console.log('Started');
+                console.log(`1. ${yield}`); // (A)
+                console.log(`2. ${yield}`);
+                return 'result';
+            }       
+            > let genObj = dataConsumer();     
+            > genObj.next() // starts the observe
+            Started
+            { value: undefined, done: false }
+            > genObj.next('a')
+            1. a
+            { value: undefined, done: false }
+            > genObj.next('b')
+            2. b
+            { value: 'result', done: true }
+
+      section
+        h2 return() and throw()
         ul
-          li
-            strong Enjoy! :)
-            a(href='http://twitter.com/markdalgleish')  -@markdalgleish
+          li return(x) executes return x at the location of yield.
+          li throw(x) executes throw x at the location of yield.
+
+      section
+        h2 return/throw examples
+        h3 TODOs
+
+      section
+        h2 Generators as coroutines
+        pre.my-small
+          code.language-javascript.
+            // Combines Iterator for output and Observer for input.
+            interface Generator {
+              next(value? : any) : IteratorResult;
+              throw(value? : any) : IteratorResult;
+              return(value? : any) : IteratorResult;
+            }
+            interface IteratorResult {
+              value : any;
+              done : boolean;
+            }
+
+      section
+        h2 Generators and Promises
+        h3.bullet Asynchronous computations
+        ul
+          li Generators can be suspended until a promise result arrives
+          li Generators do not block the event loop
+
+      section
+        pre.my-small
+          code.language-javascript.
+            co(function* () {
+              var tweets = yield getTweets();
+              var userIds = getUniqueUserIds(tweets);
+              var usersPromises = userIds.map(function(userId) {
+                return getUser(userId);
+              });
+              var users = yield Promise.all(usersPromises);
+              console.log(users);
+            });
+
+      section
+        pre.my-small
+          code.language-javascript.
+            function co(genFunc) {
+              var genObj = genFunc();
+              run();
+              function run(promiseResult) {
+                var result = genObj.next(promiseResult);
+                if (!result.done) {
+                  // A Promise was yielded
+                  result.value
+                    .then(function(result) {
+                      run(result);
+                    })
+                    .catch(function(error) {
+                      genObj.throw(error);
+                    });
+                }
+              }
+            }       
+
+      section
+        h2 References
+        p
+          a(href="http://exploringjs.com/es6/ch_generators.html") Exploring ES6 - Generators
 
     script(src='build/build.js')

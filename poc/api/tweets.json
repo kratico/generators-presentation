@@ -1,0 +1,19 @@
+[{
+  "text": "tweet text 1",
+  "userId": 1
+},{
+  "text": "tweet text 2",
+  "userId": 1
+},{
+  "text": "tweet text 3",
+  "userId": 2
+},{
+  "text": "tweet text 4",
+  "userId": 2
+},{
+  "text": "tweet text 5",
+  "userId": 3
+},{
+  "text": "tweet text 6",
+  "userId": 4
+}]

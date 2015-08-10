@@ -81,13 +81,18 @@ gulp.task('clean:images', function(done) {
 
 gulp.task('connect', ['build'], function() {
   connect.server({
-    root: 'dist',
+    root: ['dist', 'poc'],
     livereload: true
   });
 });
 
 gulp.task('open', ['connect'], function (done) {
   opn('http://localhost:8080', done);
+});
+
+gulp.task('poc', function() {
+  return gulp.src('poc/**/*')
+    .pipe(connect.reload());
 });
 
 gulp.task('watch', function() {
@@ -98,6 +103,7 @@ gulp.task('watch', function() {
     'src/scripts/**/*.js',
     'bespoke-theme-*/dist/*.js' // Allow themes to be developed in parallel
   ], ['js']);
+  gulp.watch('poc/**/*', ['poc']);
 });
 
 gulp.task('deploy', ['build'], function(done) {
