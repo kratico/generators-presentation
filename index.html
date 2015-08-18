@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>JavaScript Generators</title>
+    <link rel="stylesheet" type="text/css" href="build/build.css">
+    <style>
+      .moyl8hW {
+        background-image: url('images/moyl8hW.jpg')
+      }
+      
+      .MPkbiEa {
+        background-image: url('images/MPkbiEa.jpg')
+      }
+      
+    </style>
+  </head>
+  <body>
+    <article>
+      <section data-bespoke-backdrop="MPkbiEa"></section>
+      <section>
+        <h1>JavaScript Generators</h1>
+        <h3>by Matias Volpe</h3>
+      </section>
+      <section>
+        <h2 class="bullet">Async Control Flow</h2>
+        <ul>
+          <li>Callbacks</li>
+          <li>Promises</li>
+          <li>Generators</li>
+          <li>aync/await (ES7/ES2016)</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Problem</h2>
+        <h3 class="bullet">Get all the users from a tweet stream</h3>
+        <ul>
+          <li>Get tweets</li>
+          <li>Get userIds</li>
+          <li>Make a request for each userId</li>
+          <li>Return a user array</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Problem APIs</h2>
+        <pre class="my-small"><code class="language-javascript">// GET api/tweets.json
+[{
+  "text": "tweet text 1",
+  "userId": 1
+},{
+  "text": "tweet text 2",
+  "userId": 2
+}]
+
+// GET api/user-1.json
+{
+  "id": 1,
+  "name": "user-1"
+}
+</code></pre>
+      </section>
+      <section>
+        <h2>Callbacks</h2>
+        <pre class="my-small"><code class="language-javascript">function getUsersForTweets(cb) {
+  request('api/tweets.json', function(err, tweets) {
+    async.map(
+      ['api/user-' + tweets[0].userId + '.json',
+       'api/user-' + tweets[1].userId + '.json',
+       'api/user-' + tweets[2].userId + '.json'],
+      request,
+      function(err, results) {
+        cb(null, results);
+    });
+  });
+}
+getUsersForTweets(function(err, results) {
+  console.log(results);
+});
+</code></pre>
+      </section>
+      <section>
+        <h2>Callbacks</h2>
+        <pre class="my-small"><code class="language-javascript">function getUsersForTweets(cb) {
+  getTweets(function(err, tweets) {
+    var userIds = getUniqueUserIds(tweets);
+    async.map(userIds, getUser, function(err, results) {
+      cb(null, results);
+    });
+  });
+}
+
+getUsersForTweets(function(err, results) {
+  console.log(results);
+});
+</code></pre>
+      </section>
+      <section>
+        <h2>Callbacks</h2>
+        <pre class="my-small"><code class="language-javascript">function request(url, cb) {
+  // See https://api.jquery.com/jquery.get/
+  $.get(url, function(result) {
+    cb(null, result);
+  });
+}
+
+function getTweets(cb) {
+  request('api/tweets.json', cb);
+}
+
+function getUser(userId, cb) {
+  request('api/user-' + userId + '.json', cb);
+}
+</code></pre>
+      </section>
+      <section>
+        <h2>Promises</h2>
+        <pre class="my-small"><code class="language-javascript">function getUsersForTweets() {
+  return request('api/tweets.json')
+    .then(function(tweets) {
+      return Promise.all([
+        request('api/user-' + tweets[0].userId + '.json'),
+        request('api/user-' + tweets[1].userId + '.json'),
+        request('api/user-' + tweets[2].userId + '.json')
+      ]);
+    });
+}
+
+getUsersForTweets()
+  .then(console.log);
+  </code></pre>
+      </section>
+      <section>
+        <h2>Promises</h2>
+        <pre class="my-small"><code class="language-javascript">function getUsersForTweets() {
+  return getTweets()
+    .then(function(tweets) {
+      var userIds = getUniqueUserIds(tweets);
+      var usersPromises = userIds.map(function(userId) {
+        return getUser(userId);
+      });
+      return Promise.all(usersPromises);
+    });
+}
+
+getUsersForTweets()
+  .then(console.log);
+  </code></pre>
+      </section>
+      <section>
+        <h2>Promises</h2>
+        <pre class="my-small"><code class="language-javascript">function request(url) {
+  // See https://api.jquery.com/jquery.get/
+  return new Promise(function(resolve, reject) {
+    $.get(url, resolve);
+  });
+}
+
+function getTweets() {
+  return request('api/tweets.json');
+}
+
+function getUser(userId) {
+  return request('api/user-' + userId + '.json');
+}
+</code></pre>
+      </section>
+      <section>
+        <h2>Generators</h2>
+        <pre class="my-small"><code class="language-javascript">co(function* getUsersForTweets2() {
+  var tweets = yield request('api/tweets.json');
+  var users = yield Promise.all([
+    request('api/user-' + tweets[0].userId + '.json'),
+    request('api/user-' + tweets[1].userId + '.json'),
+    request('api/user-' + tweets[2].userId + '.json')
+  ]);
+  console.log(users);
+});
+</code></pre>
+      </section>
+      <section>
+        <h2>Generators</h2>
+        <pre class="my-small"><code class="language-javascript">co(function* getUsersForTweets() {
+  var tweets = yield getTweets();
+  var userIds = getUniqueUserIds(tweets);
+  var usersPromises = userIds.map(function(userId) {
+    return getUser(userId);
+  });
+  var users = yield Promise.all(usersPromises);
+  console.log(users);
+});
+</code></pre>
+      </section>
+      <section>
+        <h2>aync/await (ES7/ES2016)</h2>
+        <pre class="my-small"><code class="language-javascript">async function getUsersForTweets() {
+  var tweets = await getTweets();
+  var userIds = getUniqueUserIds(tweets);
+  var usersPromises = userIds.map(function(userId) {
+    return getUser(userId);
+  });
+  var users = await Promise.all(usersPromises);
+  console.log(users);
+};
+</code></pre>
+      </section>
+      <section>
+        <h2>Event Loop Refresher</h2>
+        <p><a href="http://latentflip.com/loupe/">Demo</a></p>
+      </section>
+      <section>
+        <h2>What are generators?</h2>
+        <pre class="my-small"><code class="language-javascript">function* genFunc() {
+  console.log('First');
+  yield; // (A)
+  console.log('Second'); // (B)
+}
+
+> var genObj = genFunc();
+> genObj.next()
+First
+{ value: undefined, done: false }
+> genObj.next()
+Second
+{ value: undefined, done: true }
+</code></pre>
+      </section>
+      <section>
+        <h2>Generators as</h2>
+        <ul>
+          <li>Iterators (data producers)</li>
+          <li>Observers (data consumers)</li>
+          <li>Coroutines (data producers and consumers)</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Generators as Iterators</h2>
+        <pre class="my-small"><code class="language-javascript">interface Iterable {
+  [Symbol.iterator]() : Iterator;
+}
+interface Iterator {
+  next() : IteratorResult;
+  return?(value? : any) : IteratorResult;
+}
+interface IteratorResult {
+  value : any;
+  done : boolean;
+}
+</code></pre>
+      </section>
+      <section>
+        <pre class="my-small"><code class="language-javascript">function* genFunc() {
+    yield 'a';
+    yield 'b';
+}
+
+> var genObj = genFunc();
+> genObj.next()
+{ value: 'a', done: false }
+> genObj.next()
+{ value: 'b', done: false }
+> genObj.next() // done: true => end of sequence
+{ value: undefined, done: true }
+</code></pre>
+      </section>
+      <section>
+        <pre class="my-small"><code class="language-javascript">function* genFunc() {
+    yield 'a';
+    yield 'b';
+    return 'result'
+}
+
+> var genObj = genFunc();
+> genObj.next()
+{ value: 'a', done: false }
+> genObj.next()
+{ value: 'b', done: false }
+> genObj.next()
+{ value: 'result', done: true }
+</code></pre>
+      </section>
+      <section>
+        <h2>Generators as Observers</h2>
+        <pre><code class="language-javascript">interface Observer {
+  next(value? : any) : void;
+  return(value? : any) : void;
+  throw(error) : void;
+}
+</code></pre>
+      </section>
+      <section>
+        <h2>Generators as Observers</h2>
+        <p>As an observer, a generator pauses until it receives input. There are three kinds of input, transmitted via the methods specified by the interface:</p>
+        <ul>
+          <li>next() sends normal input.</li>
+          <li>return() terminates the generator.</li>
+          <li>throw() signals an error.</li>
+        </ul>
+      </section>
+      <section>
+        <pre class="my-small"><code class="language-javascript">function* dataConsumer() {
+    console.log('Started');
+    console.log(`1. ${yield}`); // (A)
+    console.log(`2. ${yield}`);
+    return 'result';
+}       
+> let genObj = dataConsumer();     
+> genObj.next() // starts the observe
+Started
+{ value: undefined, done: false }
+> genObj.next('a')
+1. a
+{ value: undefined, done: false }
+> genObj.next('b')
+2. b
+{ value: 'result', done: true }
+</code></pre>
+      </section>
+      <section>
+        <h2>return() and throw()</h2>
+        <ul>
+          <li>return(x) executes return x at the location of yield.</li>
+          <li>throw(x) executes throw x at the location of yield.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>return/throw examples</h2>
+        <h3>TODOs</h3>
+      </section>
+      <section>
+        <h2>Generators as coroutines</h2>
+        <pre class="my-small"><code class="language-javascript">// Combines Iterator for output and Observer for input.
+interface Generator {
+  next(value? : any) : IteratorResult;
+  throw(value? : any) : IteratorResult;
+  return(value? : any) : IteratorResult;
+}
+interface IteratorResult {
+  value : any;
+  done : boolean;
+}
+</code></pre>
+      </section>
+      <section>
+        <h2>Generators and Promises</h2>
+        <h3 class="bullet">Asynchronous computations</h3>
+        <ul>
+          <li>Generators can be suspended until a promise result arrives</li>
+          <li>Generators do not block the event loop</li>
+        </ul>
+      </section>
+      <section>
+        <pre class="my-small"><code class="language-javascript">co(function* () {
+  var tweets = yield getTweets();
+  var userIds = getUniqueUserIds(tweets);
+  var usersPromises = userIds.map(function(userId) {
+    return getUser(userId);
+  });
+  var users = yield Promise.all(usersPromises);
+  console.log(users);
+});
+</code></pre>
+      </section>
+      <section>
+        <pre class="my-small"><code class="language-javascript">function co(genFunc) {
+  var genObj = genFunc();
+  run();
+  function run(promiseResult) {
+    var result = genObj.next(promiseResult);
+    if (!result.done) {
+      // A Promise was yielded
+      result.value
+        .then(function(result) {
+          run(result);
+        })
+        .catch(function(error) {
+          genObj.throw(error);
+        });
+    }
+  }
+}       
+</code></pre>
+      </section>
+      <section>
+        <h2>References</h2>
+        <p><a href="http://exploringjs.com/es6/ch_generators.html">Exploring ES6 - Generators</a></p>
+      </section>
+      <section data-bespoke-backdrop="moyl8hW"></section>
+    </article>
+    <script src="build/build.js"></script>
+  </body>
+</html>
