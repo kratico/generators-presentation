@@ -3,7 +3,10 @@
   function request(url) {
     // See https://api.jquery.com/jquery.get/
     return new Promise(function(resolve, reject) {
-      $.get(url, resolve);
+      $.get(url, resolve)
+      .fail(function(jqXHR, status, error) {
+        reject(error);
+      });
     });
   }
 
@@ -50,6 +53,9 @@
   getUsersForTweets()
     .then(function(results) {
       console.log(results);
+    })
+    .catch(function(reason) {
+      console.error(reason);
     });
 
   // getUsersForTweets2()

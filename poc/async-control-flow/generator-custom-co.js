@@ -2,7 +2,10 @@
   // Utils
   function request(url) {
     return new Promise(function(resolve, reject) {
-      $.get(url, resolve);
+      $.get(url, resolve)
+      .fail(function(jqXHR, status, error) {
+        reject(error);
+      });
     });
   }
 
@@ -54,6 +57,21 @@
   });
 
   // co(function* getUsersForTweets2() {
+  //   var users = [];
+  //   try {
+  //     var tweets = yield getTweets();
+  //     var userIds = getUniqueUserIds(tweets);
+  //     var usersPromises = userIds.map(function(userId) {
+  //       return getUser(userId);
+  //     });
+  //     users = yield Promise.all(usersPromises);
+  //   } catch (ex) {
+  //     console.error(ex);
+  //   }
+  //   console.log(users);
+  // });
+
+  // co(function* getUsersForTweets3() {
   //   var tweets = yield request('api/tweets.json');
   //   var users = yield Promise.all([
   //     request('api/user-' + tweets[0].userId + '.json'),

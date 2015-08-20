@@ -4,6 +4,9 @@
     // See https://api.jquery.com/jquery.get/
     $.get(url, function(result) {
       cb(null, result);
+    })
+    .fail(function(jqXHR, status, error) {
+      cb(error);
     });
   }
 
@@ -28,9 +31,7 @@
   function getUsersForTweets(cb) {
     getTweets(function(err, tweets) {
       var userIds = getUniqueUserIds(tweets);
-      async.map(userIds, getUser, function(err, results) {
-        cb(null, results);
-      });
+      async.map(userIds, getUser, cb);
     });
   }
 
@@ -41,18 +42,31 @@
          'api/user-' + tweets[1].userId + '.json',
          'api/user-' + tweets[2].userId + '.json'],
         request,
-        function(err, results) {
-          cb(null, results);
-        }
+        cb
       );
     });
   }
 
+  function getUsersForTweets3(cb) {
+    async.waterfall([
+      getTweets,
+      async.asyncify(getUniqueUserIds),
+      function(userIds, next) {
+        async.map(userIds, getUser, next);
+      }
+    ], cb);
+  }
+
   getUsersForTweets(function(err, results) {
+    if (err) return console.error(err);
     console.log(results);
   });
 
   // getUsersForTweets2(function(err, results) {
+  //   console.log(results);
+  // });
+  //
+  // getUsersForTweets3(function(err, results) {
   //   console.log(results);
   // });
 

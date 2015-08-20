@@ -9,12 +9,105 @@ html
 
     style.
       .moyl8hW {
-        background-image: url('images/moyl8hW.jpg')
+        background-image: url('images/moyl8hW.jpg');
       }
 
       .MPkbiEa {
-        background-image: url('images/MPkbiEa.jpg')
+        background-image: url('images/MPkbiEa.jpg');
       }
+
+      .spaghetti {
+        background-image: url('images/spaghetti.jpeg');
+      }
+
+      .coffee {
+        background-image: url('images/tumblr_lzvxa27m6M1r2gn3bo1_400.gif');
+      }
+
+      .serious {
+        background-image: url('images/tumblr_lhhjisnv1x1qe0eclo1_r10_500.gif');
+      }
+
+      .first-job {
+        background-image: url('images/interview.gif');
+      }
+
+      article {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      article::before, article::after {
+        display: block;
+        position: absolute;
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        content: "";
+        -webkit-filter: grayscale(0.3) brightness(0.3);
+        -moz-filter: grayscale(0.3) brightness(0.3);
+        filter: grayscale(0.3) brightness(0.3);
+      }
+
+      article::before {
+        z-index: 1;
+        width: 20%;
+        height: 20%;
+        top: 50%;
+        left: 50%;
+        margin-top: -5%;
+        margin-left: -10%;
+        -webkit-transform: scale(5.5);
+        -moz-transform: scale(5.5);
+        -ms-transform: scale(5.5);
+        -o-transform: scale(5.5);
+        transform: scale(5.5);
+      }
+
+      article::after {
+        z-index: 1;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      article.programming::after {
+        -webkit-filter: none;
+        -moz-filter: none;
+        filter: none;
+        background-size: contain;
+        background-image: url('images/di-JMPP.gif');
+      }
+
+      article.programming2::after {
+        -webkit-filter: none;
+        -moz-filter: none;
+        filter: none;
+        background-size: contain;
+        background-image: url('images/bruce.gif');
+      }
+
+      article.goodfilms::after {
+        -webkit-filter: none;
+        -moz-filter: none;
+        filter: none;
+        background-size: contain;
+        background-image: url('images/tumblr_lgb02mCfLm1qe0eclo1_r5_500.gif');
+      }
+
+      article.yolo::after {
+        -webkit-filter: none;
+        -moz-filter: none;
+        filter: none;
+        background-size: contain;
+        background-image: url('images/tumblr_m30nd7SIk41r34vqgo1_1280.gif');
+      }
+
+     
 
   body
     article
@@ -31,6 +124,13 @@ html
           li Promises
           li Generators
           li aync/await (ES7/ES2016)
+
+      section(data-bespoke-backdrop='first-job')
+        h2.bullet Pablitos story
+        ul
+          li.bullet Recently graduated
+          li.bullet Knows some Java
+          li.bullet Manages synchronous programming
 
       section
         h2 Problem
@@ -61,8 +161,63 @@ html
             }
 
       section
+        h2 Callbacks vs Promises
+        pre.my-small
+          code.language-javascript.
+            function request(url, cb) {
+              // See https://api.jquery.com/jquery.get/
+              $.get(url, function(result) {
+                cb(null, result);
+              });
+            }
+
+            function request(url) {
+              return new Promise(function(resolve, reject) {
+                $.get(url, resolve);
+              });
+            }
+
+      section(data-bespoke-state="programming2")
+
+      section(data-bespoke-backdrop='spaghetti')
+        h2.bullet Callbacks
+        pre.bullet.my-small
+          code.language-javascript.
+            function getUsersForTweets(cb) {
+              request('api/tweets.json', function(err, tweets) {
+                var userIds = getUniqueUserIds(tweets);
+                var pending = userIds.length;
+                var users = new Array(userIds.length);
+                userIds.forEach(function(userId, i) {
+                  // ???  
+
+
+
+                });
+              });
+            }
+
+      section(data-bespoke-backdrop='spaghetti')
         h2 Callbacks
         pre.my-small
+          code.language-javascript.
+            function getUsersForTweets(cb) {
+              request('api/tweets.json', function(err, tweets) {
+                var userIds = getUniqueUserIds(tweets);
+                var pending = userIds.length;
+                var users = new Array(userIds.length);
+                userIds.forEach(function(userId, i) {
+                  request('api/user-' + userId + '.json', function(err, user) {
+                    users[i] = user;
+                    --pending || cb(null, users);
+                  });
+                });
+              });
+            }
+
+      section
+        h2.bullet Callbacks + Async.js
+        pre.my-small.bullet
           code.language-javascript.
             function getUsersForTweets(cb) {
               request('api/tweets.json', function(err, tweets) {
@@ -71,28 +226,10 @@ html
                    'api/user-' + tweets[1].userId + '.json',
                    'api/user-' + tweets[2].userId + '.json'],
                   request,
-                  function(err, results) {
-                    cb(null, results);
-                });
+                  cb
+                );
               });
             }
-            getUsersForTweets(function(err, results) {
-              console.log(results);
-            });
-
-      section
-        h2 Callbacks
-        pre.my-small
-          code.language-javascript.
-            function getUsersForTweets(cb) {
-              getTweets(function(err, tweets) {
-                var userIds = getUniqueUserIds(tweets);
-                async.map(userIds, getUser, function(err, results) {
-                  cb(null, results);
-                });
-              });
-            }
-
             getUsersForTweets(function(err, results) {
               console.log(results);
             });
@@ -117,6 +254,40 @@ html
             }
 
       section
+        h2 Callbacks + Async.js
+        pre.my-small
+          code.language-javascript.
+            function getUsersForTweets(cb) {
+              getTweets(function(err, tweets) {
+                var userIds = getUniqueUserIds(tweets);
+                async.map(userIds, getUser, cb);
+              });
+            }
+
+            getUsersForTweets(function(err, results) {
+              console.log(results);
+            });
+
+      section
+        h2 Callbacks + Async.js
+        pre.my-small
+          code.language-javascript.
+            function getUsersForTweets(cb) {
+              async.waterfall([
+                getTweets,
+                async.asyncify(getUniqueUserIds),
+                function(userIds, next) {
+                  async.map(userIds, getUser, next);
+                }
+              ], cb);
+            }
+
+      section
+        h1 Promises
+
+      section(data-bespoke-state="programming")
+
+      section
         h2 Promises
         pre.my-small
           code.language-javascript.
@@ -132,25 +303,7 @@ html
             }
 
             getUsersForTweets()
-              .then(console.log);
-
-      section
-        h2 Promises
-        pre.my-small
-          code.language-javascript.
-            function getUsersForTweets() {
-              return getTweets()
-                .then(function(tweets) {
-                  var userIds = getUniqueUserIds(tweets);
-                  var usersPromises = userIds.map(function(userId) {
-                    return getUser(userId);
-                  });
-                  return Promise.all(usersPromises);
-                });
-            }
-
-            getUsersForTweets()
-              .then(console.log);
+              .then(log);
 
       section
         h2 Promises
@@ -172,18 +325,43 @@ html
             }
 
       section
+        h2 Promises
+        pre.my-small
+          code.language-javascript.
+            function getUsersForTweets() {
+              return getTweets()
+                .then(function(tweets) {
+                  var userIds = getUniqueUserIds(tweets);
+                  var usersPromises = userIds.map(function(userId) {
+                    return getUser(userId);
+                  });
+                  return Promise.all(usersPromises);
+                });
+            }
+
+            getUsersForTweets()
+              .then(log);
+
+      section
+        h1 Generators
+
+      section
         h2 Generators
         pre.my-small
           code.language-javascript.
-            co(function* getUsersForTweets2() {
+            co(function* getUsersForTweets() {
               var tweets = yield request('api/tweets.json');
               var users = yield Promise.all([
                 request('api/user-' + tweets[0].userId + '.json'),
                 request('api/user-' + tweets[1].userId + '.json'),
                 request('api/user-' + tweets[2].userId + '.json')
               ]);
+              return users;              
+            })(function(err, users) {
               console.log(users);
             });
+
+      section(data-bespoke-state="goodfilms")
 
       section
         h2 Generators
@@ -196,6 +374,8 @@ html
                 return getUser(userId);
               });
               var users = yield Promise.all(usersPromises);
+              return users;
+            })(function(err, users) {
               console.log(users);
             });
 
@@ -218,7 +398,7 @@ html
         p
           a(href="http://latentflip.com/loupe/") Demo
       
-      section
+      section(data-bespoke-backdrop='coffee')
         h2 What are generators?
         pre.my-small
           code.language-javascript.
@@ -236,7 +416,7 @@ html
             Second
             { value: undefined, done: true }
 
-      section
+      section(data-bespoke-backdrop='coffee')
         h2 Generators as
         ul
           li Iterators (data producers)
@@ -303,43 +483,80 @@ html
             }
 
       section
-        h2 Generators as Observers
-        p As an observer, a generator pauses until it receives input. There are three kinds of input, transmitted via the methods specified by the interface:
+        h2.bullet Generators as Observers
+        p As an observer, a generator pauses until it receives input.
+        p There are three kinds of input, transmitted via the methods specified by the interface:
         ul
-          li next() sends normal input.
-          li return() terminates the generator.
-          li throw() signals an error.
+          li.bullet next() sends normal input.
+          li.bullet return() terminates the generator.
+          li.bullet throw() signals an error.
 
       section
         pre.my-small
           code.language-javascript.
             function* dataConsumer() {
                 console.log('Started');
-                console.log(`1. ${yield}`); // (A)
-                console.log(`2. ${yield}`);
+                console.log('1. received', yield);
+                console.log('2. received', yield);
                 return 'result';
             }       
-            > let genObj = dataConsumer();     
-            > genObj.next() // starts the observe
+            > var genObj = dataConsumer();     
+            > genObj.next() // starts the observer
             Started
             { value: undefined, done: false }
             > genObj.next('a')
-            1. a
+            1. received a
             { value: undefined, done: false }
             > genObj.next('b')
-            2. b
+            2. received b
             { value: 'result', done: true }
 
       section
-        h2 return() and throw()
+        h2.bullet return() and throw()
         ul
-          li return(x) executes return x at the location of yield.
-          li throw(x) executes throw x at the location of yield.
+          li.bullet return(x) executes return x at the location of yield.
+          li.bullet throw(x) executes throw x at the location of yield.
 
       section
-        h2 return/throw examples
-        h3 TODOs
-
+        h2 return()
+        pre.my-small
+          code.language-javascript.
+            function* genFunc() {
+              try {
+                console.log('Started');
+                yield; // (A)
+              } finally {
+                console.log('Exiting');
+              }
+            }
+            > var genObj = genFunc();
+            > genObj.next()
+            Started
+            { value: undefined, done: false }
+            > genObj.return('Result')
+            Exiting
+            { value: 'Result', done: true }
+        
+      section
+        h2 throw()
+        pre.my-small
+          code.language-javascript.
+            function* genFunc() {
+              try {
+                console.log('Started');
+                yield; // (A)
+              } catch (error) {
+                console.log('Caught: ' + error);
+              }
+            }
+            > var genObj = genFunc();
+            > genObj.next()
+            Started
+            { value: undefined, done: false }
+            > genObj.throw(new Error('Problem!'))
+            Caught: Error: Problem!
+            { value: undefined, done: true }
+        
       section
         h2 Generators as coroutines
         pre.my-small
@@ -365,15 +582,41 @@ html
       section
         pre.my-small
           code.language-javascript.
-            co(function* () {
+            co(function* getUsersForTweets() {
               var tweets = yield getTweets();
               var userIds = getUniqueUserIds(tweets);
               var usersPromises = userIds.map(function(userId) {
                 return getUser(userId);
               });
               var users = yield Promise.all(usersPromises);
+              return users;
+            })(function(err, users) {
               console.log(users);
             });
+
+      section
+        h2.bullet Why do we need a runner?
+        pre.my-small
+          code.language-javascript.
+            function* genFunc() {
+              yield Promise.resolve(1);
+            }
+            > var genObj = genFunc();
+            > genObj.next();
+            { value: Promise, done: false }
+
+      section
+        h2.bullet Why do we need a runner?
+        pre.my-small
+          code.language-javascript.
+            function* genFunc() {
+              yield Promise.resolve(1);
+            }
+            > var genObj = genFunc();
+            > genObj.next().value.then(function(value) {
+                console.log('value:', value);
+              });
+            value: 1
 
       section
         pre.my-small
@@ -394,7 +637,70 @@ html
                     });
                 }
               }
-            }       
+            }
+
+      section(data-bespoke-backdrop='serious')
+        h1 Error Handling
+
+      section
+        h2 Callback Request + Error
+        pre.my-small
+          code.language-javascript.
+            function request(url, cb) {              
+              $.get(url, function(result) {
+                cb(null, result);
+              })
+              .fail(function(jqXHR, status, error) {
+                cb(error);
+              });
+            }
+
+      section
+        h2 Promise Request + Error
+        pre.my-small
+          code.language-javascript.
+            function request(url) {
+              return new Promise(function(resolve, reject) {
+                $.get(url, resolve)
+                .fail(function(jqXHR, status, error) {
+                  reject(error);
+                });
+              });
+            }
+
+      section
+        h2 Generator Error handling
+        pre.my-small
+          code.language-javascript.
+            co(function* getUsersForTweets() {
+              var users = [];
+              try {
+                var tweets = yield getTweets();         // A
+                var userIds = getUniqueUserIds(tweets); // B
+                users = yield userIds.map(getUser);     // C
+              } catch (ex) {
+                console.error(ex);
+              }
+              return users;
+            })(function(err, users) {
+              if (err) return console.error(err);
+              console.log(users);
+            });
+
+      section(data-bespoke-state="yolo")
+
+      section
+        h2.bullet How to use generators today?
+        ul
+          li Transpilers + SourceMaps
+            ul
+              li https://facebook.github.io/regenerator/
+              li https://babeljs.io/
+              li https://github.com/google/traceur-compiler
+          li Browsers: Chrome 44+, Firefox 40+
+          li node --harmony, io.js
+        
+        a.bullet(href="https://kangax.github.io/compat-table/es6/#generators") ECMAScript compatibility table
 
       section
         h2 References
