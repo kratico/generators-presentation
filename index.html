@@ -7,12 +7,105 @@
     <link rel="stylesheet" type="text/css" href="build/build.css">
     <style>
       .moyl8hW {
-        background-image: url('images/moyl8hW.jpg')
+        background-image: url('images/moyl8hW.jpg');
       }
       
       .MPkbiEa {
-        background-image: url('images/MPkbiEa.jpg')
+        background-image: url('images/MPkbiEa.jpg');
       }
+      
+      .spaghetti {
+        background-image: url('images/spaghetti.jpeg');
+      }
+      
+      .coffee {
+        background-image: url('images/tumblr_lzvxa27m6M1r2gn3bo1_400.gif');
+      }
+      
+      .serious {
+        background-image: url('images/tumblr_lhhjisnv1x1qe0eclo1_r10_500.gif');
+      }
+      
+      .first-job {
+        background-image: url('images/interview.gif');
+      }
+      
+      article {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      
+      article::before, article::after {
+        display: block;
+        position: absolute;
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        content: "";
+        -webkit-filter: grayscale(0.3) brightness(0.3);
+        -moz-filter: grayscale(0.3) brightness(0.3);
+        filter: grayscale(0.3) brightness(0.3);
+      }
+      
+      article::before {
+        z-index: 1;
+        width: 20%;
+        height: 20%;
+        top: 50%;
+        left: 50%;
+        margin-top: -5%;
+        margin-left: -10%;
+        -webkit-transform: scale(5.5);
+        -moz-transform: scale(5.5);
+        -ms-transform: scale(5.5);
+        -o-transform: scale(5.5);
+        transform: scale(5.5);
+      }
+      
+      article::after {
+        z-index: 1;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      
+      article.programming::after {
+        -webkit-filter: none;
+        -moz-filter: none;
+        filter: none;
+        background-size: contain;
+        background-image: url('images/di-JMPP.gif');
+      }
+      
+      article.programming2::after {
+        -webkit-filter: none;
+        -moz-filter: none;
+        filter: none;
+        background-size: contain;
+        background-image: url('images/bruce.gif');
+      }
+      
+      article.goodfilms::after {
+        -webkit-filter: none;
+        -moz-filter: none;
+        filter: none;
+        background-size: contain;
+        background-image: url('images/tumblr_lgb02mCfLm1qe0eclo1_r5_500.gif');
+      }
+      
+      article.yolo::after {
+        -webkit-filter: none;
+        -moz-filter: none;
+        filter: none;
+        background-size: contain;
+        background-image: url('images/tumblr_m30nd7SIk41r34vqgo1_1280.gif');
+      }
+      
+      
       
     </style>
   </head>
@@ -30,6 +123,14 @@
           <li>Promises</li>
           <li>Generators</li>
           <li>aync/await (ES7/ES2016)</li>
+        </ul>
+      </section>
+      <section data-bespoke-backdrop="first-job">
+        <h2 class="bullet">Pablitos story</h2>
+        <ul>
+          <li class="bullet">Recently graduated</li>
+          <li class="bullet">Knows some Java</li>
+          <li class="bullet">Manages synchronous programming</li>
         </ul>
       </section>
       <section>
@@ -61,35 +162,69 @@
 </code></pre>
       </section>
       <section>
+        <h2>Callbacks vs Promises</h2>
+        <pre class="my-small"><code class="language-javascript">function request(url, cb) {
+  // See https://api.jquery.com/jquery.get/
+  $.get(url, function(result) {
+    cb(null, result);
+  });
+}
+
+function request(url) {
+  return new Promise(function(resolve, reject) {
+    $.get(url, resolve);
+  });
+}
+</code></pre>
+      </section>
+      <section data-bespoke-state="programming2"></section>
+      <section data-bespoke-backdrop="spaghetti">
+        <h2 class="bullet">Callbacks</h2>
+        <pre class="bullet my-small"><code class="language-javascript">function getUsersForTweets(cb) {
+  request('api/tweets.json', function(err, tweets) {
+    var userIds = getUniqueUserIds(tweets);
+    var pending = userIds.length;
+    var users = new Array(userIds.length);
+    userIds.forEach(function(userId, i) {
+      // ???  
+      
+      
+      
+    });
+  });
+}
+</code></pre>
+      </section>
+      <section data-bespoke-backdrop="spaghetti">
         <h2>Callbacks</h2>
         <pre class="my-small"><code class="language-javascript">function getUsersForTweets(cb) {
+  request('api/tweets.json', function(err, tweets) {
+    var userIds = getUniqueUserIds(tweets);
+    var pending = userIds.length;
+    var users = new Array(userIds.length);
+    userIds.forEach(function(userId, i) {
+      request('api/user-' + userId + '.json', function(err, user) {
+        users[i] = user;
+        --pending || cb(null, users);
+      });
+    });
+  });
+}
+</code></pre>
+      </section>
+      <section>
+        <h2 class="bullet">Callbacks + Async.js</h2>
+        <pre class="my-small bullet"><code class="language-javascript">function getUsersForTweets(cb) {
   request('api/tweets.json', function(err, tweets) {
     async.map(
       ['api/user-' + tweets[0].userId + '.json',
        'api/user-' + tweets[1].userId + '.json',
        'api/user-' + tweets[2].userId + '.json'],
       request,
-      function(err, results) {
-        cb(null, results);
-    });
+      cb
+    );
   });
 }
-getUsersForTweets(function(err, results) {
-  console.log(results);
-});
-</code></pre>
-      </section>
-      <section>
-        <h2>Callbacks</h2>
-        <pre class="my-small"><code class="language-javascript">function getUsersForTweets(cb) {
-  getTweets(function(err, tweets) {
-    var userIds = getUniqueUserIds(tweets);
-    async.map(userIds, getUser, function(err, results) {
-      cb(null, results);
-    });
-  });
-}
-
 getUsersForTweets(function(err, results) {
   console.log(results);
 });
@@ -114,6 +249,37 @@ function getUser(userId, cb) {
 </code></pre>
       </section>
       <section>
+        <h2>Callbacks + Async.js</h2>
+        <pre class="my-small"><code class="language-javascript">function getUsersForTweets(cb) {
+  getTweets(function(err, tweets) {
+    var userIds = getUniqueUserIds(tweets);
+    async.map(userIds, getUser, cb);
+  });
+}
+
+getUsersForTweets(function(err, results) {
+  console.log(results);
+});
+</code></pre>
+      </section>
+      <section>
+        <h2>Callbacks + Async.js</h2>
+        <pre class="my-small"><code class="language-javascript">function getUsersForTweets(cb) {
+  async.waterfall([
+    getTweets,
+    async.asyncify(getUniqueUserIds),
+    function(userIds, next) {
+      async.map(userIds, getUser, next);
+    }
+  ], cb);
+}
+</code></pre>
+      </section>
+      <section>
+        <h1>Promises</h1>
+      </section>
+      <section data-bespoke-state="programming"></section>
+      <section>
         <h2>Promises</h2>
         <pre class="my-small"><code class="language-javascript">function getUsersForTweets() {
   return request('api/tweets.json')
@@ -127,24 +293,7 @@ function getUser(userId, cb) {
 }
 
 getUsersForTweets()
-  .then(console.log);
-  </code></pre>
-      </section>
-      <section>
-        <h2>Promises</h2>
-        <pre class="my-small"><code class="language-javascript">function getUsersForTweets() {
-  return getTweets()
-    .then(function(tweets) {
-      var userIds = getUniqueUserIds(tweets);
-      var usersPromises = userIds.map(function(userId) {
-        return getUser(userId);
-      });
-      return Promise.all(usersPromises);
-    });
-}
-
-getUsersForTweets()
-  .then(console.log);
+  .then(log);
   </code></pre>
       </section>
       <section>
@@ -166,18 +315,41 @@ function getUser(userId) {
 </code></pre>
       </section>
       <section>
+        <h2>Promises</h2>
+        <pre class="my-small"><code class="language-javascript">function getUsersForTweets() {
+  return getTweets()
+    .then(function(tweets) {
+      var userIds = getUniqueUserIds(tweets);
+      var usersPromises = userIds.map(function(userId) {
+        return getUser(userId);
+      });
+      return Promise.all(usersPromises);
+    });
+}
+
+getUsersForTweets()
+  .then(log);
+  </code></pre>
+      </section>
+      <section>
+        <h1>Generators</h1>
+      </section>
+      <section>
         <h2>Generators</h2>
-        <pre class="my-small"><code class="language-javascript">co(function* getUsersForTweets2() {
+        <pre class="my-small"><code class="language-javascript">co(function* getUsersForTweets() {
   var tweets = yield request('api/tweets.json');
   var users = yield Promise.all([
     request('api/user-' + tweets[0].userId + '.json'),
     request('api/user-' + tweets[1].userId + '.json'),
     request('api/user-' + tweets[2].userId + '.json')
   ]);
+  return users;              
+})(function(err, users) {
   console.log(users);
 });
 </code></pre>
       </section>
+      <section data-bespoke-state="goodfilms"></section>
       <section>
         <h2>Generators</h2>
         <pre class="my-small"><code class="language-javascript">co(function* getUsersForTweets() {
@@ -187,6 +359,8 @@ function getUser(userId) {
     return getUser(userId);
   });
   var users = yield Promise.all(usersPromises);
+  return users;
+})(function(err, users) {
   console.log(users);
 });
 </code></pre>
@@ -208,7 +382,7 @@ function getUser(userId) {
         <h2>Event Loop Refresher</h2>
         <p><a href="http://latentflip.com/loupe/">Demo</a></p>
       </section>
-      <section>
+      <section data-bespoke-backdrop="coffee">
         <h2>What are generators?</h2>
         <pre class="my-small"><code class="language-javascript">function* genFunc() {
   console.log('First');
@@ -225,7 +399,7 @@ Second
 { value: undefined, done: true }
 </code></pre>
       </section>
-      <section>
+      <section data-bespoke-backdrop="coffee">
         <h2>Generators as</h2>
         <ul>
           <li>Iterators (data producers)</li>
@@ -289,43 +463,78 @@ interface IteratorResult {
 </code></pre>
       </section>
       <section>
-        <h2>Generators as Observers</h2>
-        <p>As an observer, a generator pauses until it receives input. There are three kinds of input, transmitted via the methods specified by the interface:</p>
+        <h2 class="bullet">Generators as Observers</h2>
+        <p>As an observer, a generator pauses until it receives input.</p>
+        <p>There are three kinds of input, transmitted via the methods specified by the interface:</p>
         <ul>
-          <li>next() sends normal input.</li>
-          <li>return() terminates the generator.</li>
-          <li>throw() signals an error.</li>
+          <li class="bullet">next() sends normal input.</li>
+          <li class="bullet">return() terminates the generator.</li>
+          <li class="bullet">throw() signals an error.</li>
         </ul>
       </section>
       <section>
         <pre class="my-small"><code class="language-javascript">function* dataConsumer() {
     console.log('Started');
-    console.log(`1. ${yield}`); // (A)
-    console.log(`2. ${yield}`);
+    console.log('1. received', yield);
+    console.log('2. received', yield);
     return 'result';
 }       
-> let genObj = dataConsumer();     
-> genObj.next() // starts the observe
+> var genObj = dataConsumer();     
+> genObj.next() // starts the observer
 Started
 { value: undefined, done: false }
 > genObj.next('a')
-1. a
+1. received a
 { value: undefined, done: false }
 > genObj.next('b')
-2. b
+2. received b
 { value: 'result', done: true }
 </code></pre>
       </section>
       <section>
-        <h2>return() and throw()</h2>
+        <h2 class="bullet">return() and throw()</h2>
         <ul>
-          <li>return(x) executes return x at the location of yield.</li>
-          <li>throw(x) executes throw x at the location of yield.</li>
+          <li class="bullet">return(x) executes return x at the location of yield.</li>
+          <li class="bullet">throw(x) executes throw x at the location of yield.</li>
         </ul>
       </section>
       <section>
-        <h2>return/throw examples</h2>
-        <h3>TODOs</h3>
+        <h2>return()</h2>
+        <pre class="my-small"><code class="language-javascript">function* genFunc() {
+  try {
+    console.log('Started');
+    yield; // (A)
+  } finally {
+    console.log('Exiting');
+  }
+}
+> var genObj = genFunc();
+> genObj.next()
+Started
+{ value: undefined, done: false }
+> genObj.return('Result')
+Exiting
+{ value: 'Result', done: true }
+</code></pre>
+      </section>
+      <section>
+        <h2>throw()</h2>
+        <pre class="my-small"><code class="language-javascript">function* genFunc() {
+  try {
+    console.log('Started');
+    yield; // (A)
+  } catch (error) {
+    console.log('Caught: ' + error);
+  }
+}
+> var genObj = genFunc();
+> genObj.next()
+Started
+{ value: undefined, done: false }
+> genObj.throw(new Error('Problem!'))
+Caught: Error: Problem!
+{ value: undefined, done: true }
+</code></pre>
       </section>
       <section>
         <h2>Generators as coroutines</h2>
@@ -350,15 +559,39 @@ interface IteratorResult {
         </ul>
       </section>
       <section>
-        <pre class="my-small"><code class="language-javascript">co(function* () {
+        <pre class="my-small"><code class="language-javascript">co(function* getUsersForTweets() {
   var tweets = yield getTweets();
   var userIds = getUniqueUserIds(tweets);
   var usersPromises = userIds.map(function(userId) {
     return getUser(userId);
   });
   var users = yield Promise.all(usersPromises);
+  return users;
+})(function(err, users) {
   console.log(users);
 });
+</code></pre>
+      </section>
+      <section>
+        <h2 class="bullet">Why do we need a runner?</h2>
+        <pre class="my-small"><code class="language-javascript">function* genFunc() {
+  yield Promise.resolve(1);
+}
+> var genObj = genFunc();
+> genObj.next();
+{ value: Promise, done: false }
+</code></pre>
+      </section>
+      <section>
+        <h2 class="bullet">Why do we need a runner?</h2>
+        <pre class="my-small"><code class="language-javascript">function* genFunc() {
+  yield Promise.resolve(1);
+}
+> var genObj = genFunc();
+> genObj.next().value.then(function(value) {
+    console.log('value:', value);
+});
+value: 1
 </code></pre>
       </section>
       <section>
@@ -378,8 +611,68 @@ interface IteratorResult {
         });
     }
   }
-}       
+}
 </code></pre>
+      </section>
+      <section data-bespoke-backdrop="serious">
+        <h1>Error Handling</h1>
+      </section>
+      <section>
+        <h2>Callback Request + Error</h2>
+        <pre class="my-small"><code class="language-javascript">function request(url, cb) {              
+  $.get(url, function(result) {
+    cb(null, result);
+  })
+  .fail(function(jqXHR, status, error) {
+    cb(error);
+  });
+}
+</code></pre>
+      </section>
+      <section>
+        <h2>Promise Request + Error</h2>
+        <pre class="my-small"><code class="language-javascript">function request(url) {
+  return new Promise(function(resolve, reject) {
+    $.get(url, resolve)
+    .fail(function(jqXHR, status, error) {
+      reject(error);
+    });
+  });
+}
+</code></pre>
+      </section>
+      <section>
+        <h2>Generator Error handling</h2>
+        <pre class="my-small"><code class="language-javascript">co(function* getUsersForTweets() {
+  var users = [];
+  try {
+    var tweets = yield getTweets();         // A
+    var userIds = getUniqueUserIds(tweets); // B
+    users = yield userIds.map(getUser);     // C
+  } catch (ex) {
+    console.error(ex);
+  }
+  return users;
+})(function(err, users) {
+  if (err) return console.error(err);
+  console.log(users);
+});
+</code></pre>
+      </section>
+      <section data-bespoke-state="yolo"></section>
+      <section>
+        <h2 class="bullet">How to use generators today?</h2>
+        <ul>
+          <li>Transpilers + SourceMaps
+            <ul>
+              <li>https://facebook.github.io/regenerator/</li>
+              <li>https://babeljs.io/</li>
+              <li>https://github.com/google/traceur-compiler</li>
+            </ul>
+          </li>
+          <li>Browsers: Chrome 44+, Firefox 40+</li>
+          <li>node --harmony, io.js</li>
+        </ul><a href="https://kangax.github.io/compat-table/es6/#generators" class="bullet">ECMAScript compatibility table</a>
       </section>
       <section>
         <h2>References</h2>
